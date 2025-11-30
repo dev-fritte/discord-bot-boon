@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { executeCommand } from "../types";
+import { executeCommand } from '@/types';
 import { resolve } from "path";
 import getTsFiles from "./getTsFiles";
 
