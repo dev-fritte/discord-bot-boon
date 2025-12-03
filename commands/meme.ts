@@ -29,6 +29,8 @@ export const execute: executeCommand = async (interaction) => {
     const response = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
         .then(res => res.json() as unknown as MemeResponse);
 
+    console.log('picture storage response', response)
+
     const canvas = createCanvas(200, 200)
     const context = canvas.getContext('2d');
     const background = await loadImage(response.blob_url);
