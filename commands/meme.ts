@@ -64,5 +64,7 @@ export const execute: executeCommand = async (interaction) => {
         },
     }
 
+    console.log('response', response)
+
     return response;
 };
