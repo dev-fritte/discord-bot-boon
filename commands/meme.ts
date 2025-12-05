@@ -1,6 +1,6 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
 import {executeCommand} from '@/types';
-import {AttachmentBuilder, ChatInputCommandInteraction} from 'discord.js'
+import {APIInteractionResponse, AttachmentBuilder, ChatInputCommandInteraction} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
 
 type MemeResponse = {
@@ -15,8 +15,7 @@ export const register = new SlashCommandBuilder()
     .setName('meme')
     .setDescription('responds with a random meme with matching tags');
 
-export const execute: executeCommand = async (interaction: ChatInputCommandInteraction) => {
-    
+export const execute = async (interaction: ChatInputCommandInteraction) => {
     // You have access to do interaction object
     // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
 
@@ -40,8 +39,21 @@ export const execute: executeCommand = async (interaction: ChatInputCommandInter
     // Use the helpful Attachment class structure to process the file for you
     const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
 
-    await interaction.reply({
+    await (interaction as unknown as ChatInputCommandInteraction).reply({
         content: `Hier ist dein Meme ${interaction.member?.user.username}`,
         files: [meme],
     })
+
+    // you should return a APIInteractionResponse
+    // https://discord-api-types.dev/api/discord-api-types-v10#APIApplicationCommandInteraction
+
+    // const response: APIInteractionResponse = {
+    //     type: 4,
+    //     data: {
+    //         attachments: [meme],
+    //         content: `Hier ist dein Meme ${interaction.member?.user.username}`,
+    //     },
+    // }
+    //
+    // return response;
 };
