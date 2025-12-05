@@ -51,7 +51,10 @@ export const execute: executeCommand = async (interaction) => {
     // you should return a APIInteractionResponse
     // https://discord-api-types.dev/api/discord-api-types-v10#APIApplicationCommandInteraction
 
+    console.log('create json attachement');
     const memeAttachment = meme.toJSON() as RESTAPIAttachment;
+
+    console.log('attachment', memeAttachment);
 
     const response: APIInteractionResponse = {
         type: 4,
