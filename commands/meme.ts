@@ -1,6 +1,7 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {AttachmentBuilder, ChatInputCommandInteraction} from 'discord.js'
+import {APIInteractionResponse, AttachmentBuilder} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
+import {executeCommand} from '@/types'
 
 type MemeResponse = {
     id: number,
@@ -14,7 +15,7 @@ export const register = new SlashCommandBuilder()
     .setName('meme')
     .setDescription('responds with a random meme with matching tags');
 
-export const execute = async (interaction: ChatInputCommandInteraction) => {
+export const execute: executeCommand = async (interaction) => {
     // You have access to do interaction object
     // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
 
@@ -38,25 +39,25 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     // Use the helpful Attachment class structure to process the file for you
     const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
 
-    const replyResponse = await interaction.reply({
-        content: `Hier ist dein Meme ${interaction.member?.user.username}`,
-        files: [meme],
-    })
+    // const replyResponse = await interaction.reply({
+    //     content: `Hier ist dein Meme ${interaction.member?.user.username}`,
+    //     files: [meme],
+    // })
 
-    console.log('reply response', replyResponse)
-
-    return replyResponse;
+    // console.log('reply response', replyResponse)
+    //
+    // return replyResponse;
 
     // you should return a APIInteractionResponse
     // https://discord-api-types.dev/api/discord-api-types-v10#APIApplicationCommandInteraction
 
-    // const response: APIInteractionResponse = {
-    //     type: 4,
-    //     data: {
-    //         attachments: [meme],
-    //         content: `Hier ist dein Meme ${interaction.member?.user.username}`,
-    //     },
-    // }
-    //
-    // return response;
+    const response: APIInteractionResponse = {
+        type: 4,
+        data: {
+            attachments: [meme.toJSON() as any],
+            content: `Hier ist dein Meme ${interaction.member?.user.username}`,
+        },
+    }
+
+    return response;
 };
