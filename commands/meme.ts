@@ -1,6 +1,5 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {executeCommand} from '@/types';
-import {APIInteractionResponse, AttachmentBuilder, ChatInputCommandInteraction} from 'discord.js'
+import {AttachmentBuilder, ChatInputCommandInteraction} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
 
 type MemeResponse = {
@@ -39,10 +38,14 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     // Use the helpful Attachment class structure to process the file for you
     const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
 
-    await (interaction as unknown as ChatInputCommandInteraction).reply({
+    const replyResponse = await interaction.reply({
         content: `Hier ist dein Meme ${interaction.member?.user.username}`,
         files: [meme],
     })
+
+    console.log('reply response', replyResponse)
+
+    return replyResponse;
 
     // you should return a APIInteractionResponse
     // https://discord-api-types.dev/api/discord-api-types-v10#APIApplicationCommandInteraction
