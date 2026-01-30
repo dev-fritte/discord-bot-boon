@@ -1,8 +1,7 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {APIInteraction, APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
-import {createCanvas, loadImage} from '@napi-rs/canvas'
+import {APIInteraction, APIInteractionResponse} from 'discord.js'
 import {executeCommand} from '@/types'
-import {updateDiscordMessageMessage} from '@/utils/discord-api'
+import {sendAckResponse} from '@/utils/discord-api'
 
 type MemeResponse = {
     id: number,
@@ -25,18 +24,12 @@ export const execute: executeCommand = async (interaction) => {
     // You have access to do interaction object
     // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
 
-    const response: APIInteractionResponse = {
-        type: 5,
-    }
+    await sendAckResponse(interaction);
 
-    console.log('response', response)
-
-    void updateResponseWithImage(interaction)
-
-    return response;
+    return updateResponseWithImage(interaction)
 };
 
-async function updateResponseWithImage(interaction: APIInteraction): Promise<void> {
+async function updateResponseWithImage(interaction: APIInteraction): Promise<APIInteractionResponse> {
 
     console.log('start async picture loading ..')
 
@@ -68,7 +61,7 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
         if (!res.ok) {
             console.error(`HTTP Fehler: ${res.status}`);
-            return;
+            return {type: 1};
         }
 
         memeResponse = await res.json() as MemeResponse;
@@ -77,7 +70,9 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
         console.error('Kritischer Fehler beim Fetch:', e);
     }
 
-    if (!memeResponse) return;
+    if (!memeResponse) {
+        return {type: 1};
+    }
 
     const response: APIInteractionResponse = {
         type: 4,
@@ -88,6 +83,6 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
     console.log('response', response)
 
-    void updateDiscordMessageMessage(interaction.token, response);
+    return response
 
 }
