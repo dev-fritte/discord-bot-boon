@@ -14,7 +14,12 @@ type MemeResponse = {
 // Don't change register and execute variable names
 export const register = new SlashCommandBuilder()
     .setName('meme')
-    .setDescription('responds with a random meme with matching tags');
+    .setDescription('responds with a random meme with matching tags')
+    .addStringOption(option =>
+        option.setName('tags')
+            .setDescription('Tags getrennt durch Komma')
+            .setRequired(true)
+    );
 
 export const execute: executeCommand = async (interaction) => {
     // You have access to do interaction object
@@ -35,27 +40,31 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
     console.log('start async picture loading ..')
 
+    const options = (interaction.data as any).options;
+    const tagsRaw = options?.find((opt: any) => opt.name === 'tags')?.value as string | undefined;
 
-    console.log('interaction', interaction)
-    // const tags: string[] = interaction.
-    const tags = interaction.message?.content
+    // 2. Den String in ein Array umwandeln (Komma-getrennt)
+    // "tag1, tag2" -> ["tag1", "tag2"]
+    const tagsArray = tagsRaw
+        ? tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
 
-    const tagsAppendix = `tags=${tags ?? 'kai'}`
+    // 3. URL Parameter bauen
+    // Wenn dein Backend mehrere Tags erwartet, musst du entscheiden wie (z.B. tags=tag1,tag2)
+    const tagsAppendix = tagsArray.length > 0
+        ? `tags=${tagsArray.join(',')}`
+        : 'tags=boon';
 
-    console.log('tagAppendix', tagsAppendix);
-
-    console.log('call endpoint: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
+    console.log('Rufe Endpoint auf: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`);
 
     const memeResponse = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
-        .then(res => res.json() as unknown as MemeResponse)
-        .catch(err => console.error('Blob storage error', err));
+        .then(res => res.json() as Promise<MemeResponse>)
+        .catch(err => {
+            console.error('Blob storage error', err);
+            return null;
+        });
 
-    if (!memeResponse) {
-        console.log('No response from blob, terminate request')
-        return
-    }
-
-    console.log('picture storage response', memeResponse)
+    if (!memeResponse) return;
 
     const canvas = createCanvas(200, 200)
     const context = canvas.getContext('2d');
