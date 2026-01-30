@@ -20,9 +20,6 @@ export const execute: executeCommand = async (interaction) => {
     // You have access to do interaction object
     // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
 
-    // const tags: string[] = interaction.
-    // const tags: string[] = interaction.options.getString('tags');
-
     const response: APIInteractionResponse = {
         type: 5,
     }
@@ -38,12 +35,17 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
     console.log('start async picture loading ..')
 
-    const tagsAppendix = 'tags=kai'//'tags=' + tags.map(tag => '&tags=' + tag);
+
+    console.log('interaction', interaction)
+    // const tags: string[] = interaction.
+    const tags = interaction.message?.content
+
+    const tagsAppendix = `tags=${tags ?? 'kai'}`
 
     console.log('tagAppendix', tagsAppendix);
 
     console.log('call endpoint: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
-    
+
     const memeResponse = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
         .then(res => res.json() as unknown as MemeResponse)
         .catch(err => console.error('Blob storage error', err));
