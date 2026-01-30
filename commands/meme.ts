@@ -1,7 +1,8 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {APIInteraction, APIInteractionResponse} from 'discord.js'
+import {APIInteraction, APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
+import {createCanvas, loadImage} from '@napi-rs/canvas'
 import {executeCommand} from '@/types'
-import {sendAckResponse} from '@/utils/discord-api'
+import {sendAckResponse, updateDiscordMessageMessage} from '@/utils/discord-api'
 
 type MemeResponse = {
     id: number,
@@ -70,19 +71,31 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
         console.error('Kritischer Fehler beim Fetch:', e);
     }
 
-    if (!memeResponse) {
-        return {type: 1};
-    }
+    if (!memeResponse) return {type: 1};
+
+    const canvas = createCanvas(200, 200)
+    const context = canvas.getContext('2d');
+    const background = await loadImage(memeResponse.blob_url);
+    // This uses the canvas dimensions to stretch the image onto the entire canvas
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    // Use the helpful Attachment class structure to process the file for you
+    const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
+
+    console.log('create json attachement');
+    const memeAttachment = meme.toJSON() as RESTAPIAttachment;
+
+    console.log('attachment', memeAttachment);
 
     const response: APIInteractionResponse = {
-        type: 4,
+        type: 7,
         data: {
+            attachments: [memeAttachment],
             content: `Hier ist dein Meme ${interaction.member?.user.username}`,
         },
     }
 
     console.log('response', response)
 
-    return response
+    return response;
 
 }
