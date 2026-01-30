@@ -27,8 +27,22 @@ export const sendAckResponse = async (interaction: APIInteraction) => {
     }))
 }
 
-export const updateDiscordMessageMessage = async (interactionToken: string, content: APIInteractionResponse) => {
-    return (await discord_api.post(`/webhooks/${process.env.NEXT_PUBLIC_APPLICATION_ID!}/${interactionToken}/messages/@original`, {
-        content
-    }))
+export async function updateDiscordMessage(token: string, data: any) {
+    const formData = new FormData();
+
+    // Wenn Files vorhanden sind, müssen sie speziell angehängt werden
+    if (data.files) {
+        data.files.forEach((f: any, index: number) => {
+            formData.append(`files[${index}]`, new Blob([f.attachment]), f.name);
+        });
+        // Das restliche JSON muss als 'payload_json' dazu
+        formData.append('payload_json', JSON.stringify({ content: data.content }));
+    } else {
+        // ... nur JSON
+    }
+
+    return await fetch(`https://discord.com/api/v10/webhooks/${process.env.NEXT_PUBLIC_APPLICATION_ID!}/${token}/messages/@original`, {
+        method: 'PATCH',
+        body: formData,
+    });
 }

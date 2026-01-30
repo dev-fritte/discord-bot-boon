@@ -1,8 +1,8 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {APIInteraction, APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
+import {APIInteraction, APIInteractionResponse} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
 import {executeCommand} from '@/types'
-import {sendAckResponse, updateDiscordMessageMessage} from '@/utils/discord-api'
+import {sendAckResponse, updateDiscordMessage} from '@/utils/discord-api'
 
 type MemeResponse = {
     id: number,
@@ -78,24 +78,17 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
     const background = await loadImage(memeResponse.blob_url);
     // This uses the canvas dimensions to stretch the image onto the entire canvas
     context.drawImage(background, 0, 0, canvas.width, canvas.height);
-    // Use the helpful Attachment class structure to process the file for you
-    const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
 
-    console.log('create json attachement');
-    const memeAttachment = meme.toJSON() as RESTAPIAttachment;
+    const updateData = {
+        content: `Hier ist dein Meme ${interaction.member?.user.username}`,
+        files: [{
+            attachment: await canvas.encode('png'),
+            name: 'random-meme.png'
+        }]
+    };
 
-    console.log('attachment', memeAttachment);
+    await updateDiscordMessage(interaction.token, updateData)
 
-    const response: APIInteractionResponse = {
-        type: 7,
-        data: {
-            attachments: [memeAttachment],
-            content: `Hier ist dein Meme ${interaction.member?.user.username}`,
-        },
-    }
-
-    console.log('response', response)
-
-    return response;
+    return {type: 6} as any;
 
 }
