@@ -1,7 +1,9 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
-import {APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
+import {APIInteraction, APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
 import {executeCommand} from '@/types'
+import axios from 'axios'
+import {updateDiscordMessageMessage} from '@/utils/discord-api'
 
 type MemeResponse = {
     id: number,
@@ -22,12 +24,28 @@ export const execute: executeCommand = async (interaction) => {
     // const tags: string[] = interaction.
     // const tags: string[] = interaction.options.getString('tags');
 
+    const response: APIInteractionResponse = {
+        type: 5,
+    }
+
+    console.log('response', response)
+
+    void updateResponseWithImage(interaction)
+
+    return response;
+};
+
+async function updateResponseWithImage(interaction: APIInteraction): Promise<void> {
+
+    console.log('start async picture loading ..')
+
     const tagsAppendix = 'tags=kai'//'tags=' + tags.map(tag => '&tags=' + tag);
 
     console.log('tagAppendix', tagsAppendix);
 
     const memeResponse = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
         .then(res => res.json() as unknown as MemeResponse);
+
 
     console.log('picture storage response', memeResponse)
 
@@ -38,18 +56,6 @@ export const execute: executeCommand = async (interaction) => {
     context.drawImage(background, 0, 0, canvas.width, canvas.height);
     // Use the helpful Attachment class structure to process the file for you
     const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
-
-    // const replyResponse = await interaction.reply({
-    //     content: `Hier ist dein Meme ${interaction.member?.user.username}`,
-    //     files: [meme],
-    // })
-
-    // console.log('reply response', replyResponse)
-    //
-    // return replyResponse;
-
-    // you should return a APIInteractionResponse
-    // https://discord-api-types.dev/api/discord-api-types-v10#APIApplicationCommandInteraction
 
     console.log('create json attachement');
     const memeAttachment = meme.toJSON() as RESTAPIAttachment;
@@ -66,5 +72,6 @@ export const execute: executeCommand = async (interaction) => {
 
     console.log('response', response)
 
-    return response;
-};
+    void updateDiscordMessageMessage(interaction.token, response);
+
+}
