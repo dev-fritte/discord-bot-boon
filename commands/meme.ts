@@ -43,8 +43,6 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
         ? tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
 
-    // 3. URL Parameter bauen
-    // Wenn dein Backend mehrere Tags erwartet, musst du entscheiden wie (z.B. tags=tag1,tag2)
     const tagsAppendix = tagsArray.length > 0
         ? `tags=${tagsArray.join(',')}`
         : 'tags=boon';
@@ -73,14 +71,14 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
 
     if (!memeResponse) return {type: 1};
 
-    const canvas = createCanvas(200, 200)
+    const canvas = createCanvas(400, 400)
     const context = canvas.getContext('2d');
     const background = await loadImage(memeResponse.blob_url);
     // This uses the canvas dimensions to stretch the image onto the entire canvas
     context.drawImage(background, 0, 0, canvas.width, canvas.height);
 
     const updateData = {
-        content: `Hier ist dein Meme ${interaction.member?.user.username}`,
+        content: `Tags: ${tagsArray}`,
         files: [{
             attachment: await canvas.encode('png'),
             name: 'random-meme.png'
