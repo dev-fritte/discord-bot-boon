@@ -57,20 +57,45 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
     console.log('Rufe Endpoint auf: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`);
 
-    const memeResponse = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
-        .then(res => res.json() as Promise<MemeResponse>)
-        .catch(err => {
-            console.error('Blob storage error', err);
-            return null;
+    let memeResponse;
+
+    try {
+        console.log('Starte Fetch...');
+        const res = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`, {
+            method: 'GET',
+            headers: {'Accept': 'application/json'}
         });
 
-    console.log('response from blob storage', memeResponse)
+        if (!res.ok) {
+            console.error(`HTTP Fehler: ${res.status}`);
+            return;
+        }
+
+        memeResponse = await res.json() as MemeResponse;
+        console.log('response from blob storage', memeResponse);
+    } catch (e) {
+        console.error('Kritischer Fehler beim Fetch:', e);
+    }
 
     if (!memeResponse) return;
+
+    const canvas = createCanvas(200, 200)
+    const context = canvas.getContext('2d');
+    const background = await loadImage(memeResponse.blob_url);
+    // This uses the canvas dimensions to stretch the image onto the entire canvas
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    // Use the helpful Attachment class structure to process the file for you
+    const meme = new AttachmentBuilder(await canvas.encode('png'), {name: 'random-meme.png'});
+
+    console.log('create json attachement');
+    const memeAttachment = meme.toJSON() as RESTAPIAttachment;
+
+    console.log('attachment', memeAttachment);
 
     const response: APIInteractionResponse = {
         type: 4,
         data: {
+            attachments: [memeAttachment],
             content: `Hier ist dein Meme ${interaction.member?.user.username}`,
         },
     }
