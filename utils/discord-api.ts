@@ -22,5 +22,7 @@ export const fetchBotCommands = async () => {
 
 
 export const updateDiscordMessageMessage = async (interactionToken: string, content: APIInteractionResponse) => {
-    return (await discord_api.post(`/webhooks/${process.env.NEXT_PUBLIC_APPLICATION_ID!}/${interactionToken}/messages/@original`))
+    return (await discord_api.post(`/webhooks/${process.env.NEXT_PUBLIC_APPLICATION_ID!}/${interactionToken}/messages/@original`, {
+        content
+    }))
 }

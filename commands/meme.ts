@@ -2,7 +2,6 @@ import {SlashCommandBuilder} from '@discordjs/builders';
 import {APIInteraction, APIInteractionResponse, AttachmentBuilder, RESTAPIAttachment} from 'discord.js'
 import {createCanvas, loadImage} from '@napi-rs/canvas'
 import {executeCommand} from '@/types'
-import axios from 'axios'
 import {updateDiscordMessageMessage} from '@/utils/discord-api'
 
 type MemeResponse = {
@@ -43,9 +42,16 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
 
     console.log('tagAppendix', tagsAppendix);
 
+    console.log('call endpoint: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
+    
     const memeResponse = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`)
-        .then(res => res.json() as unknown as MemeResponse);
+        .then(res => res.json() as unknown as MemeResponse)
+        .catch(err => console.error('Blob storage error', err));
 
+    if (!memeResponse) {
+        console.log('No response from blob, terminate request')
+        return
+    }
 
     console.log('picture storage response', memeResponse)
 
