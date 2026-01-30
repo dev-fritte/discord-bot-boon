@@ -64,6 +64,8 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<voi
             return null;
         });
 
+    console.log('response from blob storage', memeResponse)
+    
     if (!memeResponse) return;
 
     const canvas = createCanvas(200, 200)
