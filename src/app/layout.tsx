@@ -2,9 +2,9 @@ import '@@/styles/globals.css';
 import {ClerkProvider} from '@clerk/nextjs';
 import type {Metadata} from 'next';
 import {Open_Sans} from 'next/font/google';
-import React from 'react'
+import React from 'react';
 
-const openSansFont = Open_Sans({subsets: ['latin']});
+const openSansFont = Open_Sans({subsets: ['latin'], variable: '--font-sans'});
 
 export const metadata: Metadata = {
     title: 'Nextjs Discord Bot | Budapester Boonorchester [BOON]',
@@ -55,7 +55,7 @@ export default function RootLayout({
                     content="9L9yVl1B38S_ABkJE_s2iQbhCLNYOgPMi_C8kKrWFAg"
                 />
             </head>
-            <body className={`${openSansFont.className}`}>{children}</body>
+            <body className={`${openSansFont.variable} font-sans antialiased`}>{children}</body>
             </html>
         </ClerkProvider>
     );
