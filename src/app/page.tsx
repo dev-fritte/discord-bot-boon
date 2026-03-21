@@ -1,5 +1,6 @@
 'use client';
 import {CLIENT_APPLICATION_ID} from '@/config';
+import {Show, SignInButton, UserButton} from '@clerk/nextjs';
 import axios from 'axios';
 import Link from 'next/link';
 import {FormEvent, useState} from 'react';
@@ -31,9 +32,20 @@ export default function Home() {
     return (
         <main>
             <section id="main-container">
+                <div id="auth-bar">
+                    <Show when="signed-out">
+                        <SignInButton mode="modal">
+                            <button id="login-btn">Login</button>
+                        </SignInButton>
+                    </Show>
+                    <Show when="signed-in">
+                        <Link href="/dashboard" id="dashboard-link">Dashboard</Link>
+                        <UserButton/>
+                    </Show>
+                </div>
                 <h1 id="header-text">
                     <Logo/>
-                    Nextjs Discord Bot Boilerplate
+                    [BOON] Discord Bot
                 </h1>
                 <p>{status}</p>
                 <form id="form-container" onSubmit={handleRegisterCommand}>
