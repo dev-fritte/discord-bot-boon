@@ -37,7 +37,6 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
     const options = (interaction.data as any).options;
     const tagsRaw = options?.find((opt: any) => opt.name === 'tags')?.value as string | undefined;
 
-    // 2. Den String in ein Array umwandeln (Komma-getrennt)
     // "tag1, tag2" -> ["tag1", "tag2"]
     const tagsArray = tagsRaw
         ? tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
@@ -47,33 +46,34 @@ async function updateResponseWithImage(interaction: APIInteraction): Promise<API
         ? `tags=${tagsArray.join(',')}`
         : 'tags=boon';
 
-    console.log('Rufe Endpoint auf: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`);
-
     let memeResponse;
 
     try {
-        console.log('Starte Fetch...');
+        console.log('Calling endpoint: ', `https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`);
+
         const res = await fetch(`https://next-picture-storage.vercel.app/memes/find?${tagsAppendix}`, {
             method: 'GET',
             headers: {'Accept': 'application/json'}
-        });
+        })
 
         if (!res.ok) {
-            console.error(`HTTP Fehler: ${res.status}`);
+            console.error('Could not load random meme: ', res);
             return {type: 1};
         }
 
         memeResponse = await res.json() as MemeResponse;
         console.log('response from blob storage', memeResponse);
     } catch (e) {
-        console.error('Kritischer Fehler beim Fetch:', e);
+        console.error('error while fetching: ', e);
     }
 
-    if (!memeResponse) return {type: 1};
+    if (!memeResponse) {
+        return {type: 1};
+    }
 
-    const canvas = createCanvas(400, 400)
-    const context = canvas.getContext('2d');
     const background = await loadImage(memeResponse.blob_url);
+    const canvas = createCanvas(background.width ?? 200, background.height ?? 200)
+    const context = canvas.getContext('2d');
     // This uses the canvas dimensions to stretch the image onto the entire canvas
     context.drawImage(background, 0, 0, canvas.width, canvas.height);
 
