@@ -1,12 +1,8 @@
 'use client';
 import {cn} from '@@/lib/utils';
 import {Separator} from '@@/components/ui/separator';
-import {
-    Bot,
-    Command,
-    LayoutDashboard,
-    Settings,
-} from 'lucide-react';
+import {ServerSwitcher, type CurrentServer} from '@@/components/dashboard/server-switcher';
+import {Bot, Command, LayoutDashboard, Settings} from 'lucide-react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
@@ -17,7 +13,7 @@ const navItems = [
     {label: 'Settings', href: '/dashboard/settings', icon: Settings},
 ];
 
-export default function Sidebar() {
+export default function Sidebar({currentServer}: {currentServer: CurrentServer}) {
     const pathname = usePathname();
 
     return (
@@ -26,7 +22,11 @@ export default function Sidebar() {
                 <span className="text-white font-bold text-lg">BOON Bot</span>
             </div>
 
-            <Separator className="bg-[#333]"/>
+            <Separator className="bg-[#333]" />
+
+            <ServerSwitcher currentServer={currentServer} />
+
+            <Separator className="bg-[#333]" />
 
             <nav className="flex flex-col gap-1 p-3 flex-1">
                 {navItems.map(({label, href, icon: Icon}) => (
